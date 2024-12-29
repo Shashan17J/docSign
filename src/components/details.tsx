@@ -1,7 +1,6 @@
-// components/DocuSignForm.tsx
 "use client";
 
-import { initiateSigningProcess } from "@/app/api/docuSignApis";
+import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -18,20 +17,20 @@ const DocuSignForm: React.FC = () => {
   };
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     if (validateEmail(email) && templateId.length == 36) {
       const toastId = toast.loading("Sending envelope...");
       try {
-        const response = await initiateSigningProcess({
+        const response = await axios.post("/api/docuSignApis", {
           email,
           signerName,
           templateId,
           signingType: isNotary ? "notary" : "regular",
         });
-        toast.success("Envelope Sent Successfully");
+        if (response.data.success) {
+          toast.success("Envelope Sent Successfully");
+        }
       } catch (error: any) {
-        toast.error(error.message);
-        console.log("Failed to send envelope. Please try again.", error);
+        toast.error(error.response?.data?.error || error.message);
       }
       toast.dismiss(toastId);
     } else {
@@ -49,10 +48,6 @@ const DocuSignForm: React.FC = () => {
           onSubmit={handleSubmit}
           className="bg-white shadow-md rounded-lg p-8 space-y-6"
         >
-          {/* <h3 className="text-2xl font-bold text-center text-black">
-            Signer Details
-          </h3> */}
-
           <div>
             <label
               htmlFor="templateId"

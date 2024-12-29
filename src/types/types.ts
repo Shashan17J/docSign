@@ -1,25 +1,11 @@
-export interface Signer {
-  email: string;
-  name: string;
-}
-
-export interface SendEnvelopeRequest {
-  signerEmails: Signer[];
-  isNotary: boolean;
-}
-interface Recipients {
-  signers: Signer[];
-  isNotary: boolean;
-}
-
 export interface SigningInputType {
   email: string;
   signerName: any;
   templateId: string;
-  signingType: any;
+  signingType: "regular" | "notary";
 }
 
-export interface TemplateRole {
+interface TemplateRole {
   email: string;
   name: string;
   roleName: string;
@@ -31,5 +17,5 @@ export interface InitiateSigningRequestType {
   emailSubject: string;
   templateRoles: TemplateRole[];
   status: string;
-  allowRemoteNotarization?: boolean; // Optional for notary signing
+  allowRemoteNotarization?: boolean;
 }

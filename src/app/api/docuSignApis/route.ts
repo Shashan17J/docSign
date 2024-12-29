@@ -1,7 +1,7 @@
 import axios from "axios";
 import jwt from "jsonwebtoken";
+import { NextRequest, NextResponse } from "next/server";
 import { InitiateSigningRequestType, SigningInputType } from "@/types/types";
-require("dotenv").config();
 
 const createJwtToken = async () => {
   const iat = Math.floor(Date.now() / 1000); // Current time in seconds
@@ -57,15 +57,11 @@ const getAccessToken = async () => {
     const accessToken = response.data.access_token;
     return accessToken;
   } catch (error: any) {
-    console.error(
-      "Error fetching access token:",
-      error.response?.data || error.message
-    );
     throw error;
   }
 };
 
-export const initiateSigningProcess = async ({
+const initiateSigningProcess = async ({
   email,
   signerName,
   templateId,
@@ -108,3 +104,30 @@ export const initiateSigningProcess = async ({
     throw error;
   }
 };
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { email, signerName, templateId, signingType } = body;
+
+    const envelopeId = await initiateSigningProcess({
+      email,
+      signerName,
+      templateId,
+      signingType,
+    });
+
+    return NextResponse.json({
+      success: true,
+      envelopeId,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
